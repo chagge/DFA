@@ -26,16 +26,6 @@ void GENEFACE::makeInterpFrame(const cv::Mat &imgA,const cv::Mat &imgB,const int
 	vector<cv::Mat> vFrame;
 	movingPatch(15,frameNum,vImageA[scaleDown],vImageB[scaleDown],vFrame);
 
-	for(int i=0;i<frameNum;++i)
-	{
-		stringstream test;
-		test << i << ".jpg";
-		cv::Mat temp;
-		cv::cvtColor(vFrame[i],temp,cv::COLOR_Lab2BGR);
-		cv::imwrite(test.str(),temp);
-	}
-	cv::waitKey(5);
-
 	int maxIterate=1;
 	for(int a=0;a<=scaleDown;++a)
 	{
