@@ -21,7 +21,7 @@ struct GENEFACE
 	GENEFACE(const string &filename,const std::string ymlFile,const int candiNum) : backMovie(filename), miniDist(ymlFile, candiNum), patchSize(7), scaleDown(0), beta(0.8){};
 	~GENEFACE(){};
 
-	void makeIntermFrame(const cv::Mat &imgA,const cv::Mat &imgB,const int frameNum,vector<cv::Mat> &vImage);
+	void makeInterpFrame(const cv::Mat &imgA,const cv::Mat &imgB,const int frameNum,vector<cv::Mat> &vImage);
 	void makeSentense(const string &output);
 };
 

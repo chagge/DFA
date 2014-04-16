@@ -2,14 +2,14 @@
  *  geneFace.cpp
  *
  *  Created by Shunsuke Saito on 3/26/14.
- *  Copyright 2010 Shunsuke Saito. All rights reserved.
+ *  Copyright 2014 Shunsuke Saito. All rights reserved.
  *
  */
 
 #include "geneFace.h"
 #include "movingPatch.h"
 
-void GENEFACE::makeIntermFrame(const cv::Mat &imgA,const cv::Mat &imgB,const int frameNum,vector<cv::Mat> &vImage)
+void GENEFACE::makeInterpFrame(const cv::Mat &imgA,const cv::Mat &imgB,const int frameNum,vector<cv::Mat> &vImage)
 {
 	cv::Mat imageA_Lab;
 	cv::Mat imageB_Lab;
@@ -113,12 +113,13 @@ void GENEFACE::makeSentense(const string &output)
 
 	for(int i=0;i<miniDist.result.size();++i)
 	{
-		int duration=miniDist.result[i].duration;
+		const int duration=miniDist.result[i].duration;
 		if(duration<3){
 			if(inInterp){
 				frameSize+=duration;
 			}
 			else{
+				cout << "Doubt" << endl;
 				for(int j=0;j<duration;++j)
 				{
 					cv::Mat frame;
@@ -139,7 +140,7 @@ void GENEFACE::makeSentense(const string &output)
 				backMovie >> frameB;
 				if(i!=0){
 					std::vector<cv::Mat> vImage;
-					makeIntermFrame(frameA,frameB,frameSize,vImage);
+					makeInterpFrame(frameA,frameB,frameSize,vImage);
 					for(int k=0;k<vImage.size();++k)
 					{
 						outVideo << vImage[k];
@@ -154,7 +155,7 @@ void GENEFACE::makeSentense(const string &output)
 				backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+2);
 				backMovie >> frameB;
 				std::vector<cv::Mat> vImage;
-				makeIntermFrame(frameA,frameB,frameSize,vImage);
+				makeInterpFrame(frameA,frameB,frameSize,vImage);
 				for(int k=0;k<vImage.size();++k)
 				{
 					outVideo << vImage[k];

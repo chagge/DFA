@@ -10,14 +10,14 @@ using namespace std;
 
 #ifdef _DEBUG
     //Debugモードの場合
-    #pragma comment(lib,"opencv_core300d.lib")
-    #pragma comment(lib,"opencv_imgproc300d.lib")
-    #pragma comment(lib,"opencv_highgui300d.lib")
+    #pragma comment(lib,"opencv_core248d.lib")
+    #pragma comment(lib,"opencv_imgproc248d.lib")
+    #pragma comment(lib,"opencv_highgui248d.lib")
 #else
     //Releaseモードの場合
-    #pragma comment(lib,"opencv_core300.lib")
-    #pragma comment(lib,"opencv_imgproc300.lib")
-    #pragma comment(lib,"opencv_highgui300.lib")
+    #pragma comment(lib,"opencv_core248.lib")
+    #pragma comment(lib,"opencv_imgproc248.lib")
+    #pragma comment(lib,"opencv_highgui248.lib")
 #endif
 
 namespace cv{
