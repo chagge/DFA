@@ -2,7 +2,7 @@
  *  candiPho.h
  *
  *  Created by Shunsuke Saito on 3/25/14.
- *  Copyright 2010 Shunsuke Saito. All rights reserved.
+ *  Copyright 2014 Shunsuke Saito. All rights reserved.
  *
  */
 

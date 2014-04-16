@@ -64,14 +64,6 @@ void GENEFACE::makeInterpFrame(const cv::Mat &imgA,const cv::Mat &imgB,const int
 				cv::Mat T5=vFrame[i].clone();
 				minimizeDAlphaDisCohere(patchSize,0,alpha,vFrame[0],vFrame[frameNum-1],T5);
 
-				cv::Mat temp;
-				cv::cvtColor(T3,temp,cv::COLOR_Lab2BGR);
-				cv::imwrite("T3.jpg",temp);
-				cv::cvtColor(T4,temp,cv::COLOR_Lab2BGR);
-				cv::imwrite("T4.jpg",temp);
-				cv::cvtColor(T5,temp,cv::COLOR_Lab2BGR);
-				cv::imwrite("T5.jpg",temp);
-
 				//Add T1~5
 				vFrame[i]=beta*alpha*T3+beta*(1.0-alpha)*T4+(1.0-beta)*T5;
 			}
