@@ -71,6 +71,7 @@ void GENEFACE::makeInterpFrame(const cv::Mat &imgA,const cv::Mat &imgB,const int
 			maxIterate=6*(scaleDown-a-1)/scaleDown+2;
 		}
 	}
+
 	cout << "Save Image..." << endl;
 	//Save Image
 	vImage.resize(frameNum-2);
@@ -148,6 +149,7 @@ void GENEFACE::makeSentense(const string &output)
 				}
 				frameA=frameB.clone();
 				frameSize=1;
+				continue;
 			}
 
 			if(i!=0&&j==2){
@@ -161,13 +163,16 @@ void GENEFACE::makeSentense(const string &output)
 				}
 				outVideo << frameB;
 				inInterp=false;
+				continue;
 			}
+
 			if(j==duration-3){
 				backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].endFrame-2);
 				backMovie >> frameA;
 				outVideo << frameA;
 				inInterp=true;
 				frameSize=1;
+				continue;
 			}
 
 			if(!inInterp){
