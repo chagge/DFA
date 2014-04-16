@@ -100,15 +100,32 @@ void GENEFACE::makeSentense(const string &output)
 			if(inInterp){
 				frameSize+=duration;
 			}
-			else{
-				cout << "Doubt" << endl;
-				for(int j=0;j<duration;++j)
+			else if(i==0){
+				cv::Mat frame;
+				backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame);
+				backMovie >> frame;
+				outVideo << frame;
+				frameSize+=duration-1;
+			}
+			else if(i==miniDist.result.size()-1){
+				if(frameSize==0){cout << "frameSize is 0" << endl; abort;}
+				frameSize+=duration-1;
+				for(int j=0;j<duration-1;++j)
 				{
-					cv::Mat frame;
 					backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+j*(duration/(double)miniDist.result[i].actualSize));
-					backMovie >> frame;
-					outVideo << frame;
+					backMovie >> frameB;
+					std::vector<cv::Mat> vImage;
+					makeInterpFrame(frameA,frameB,frameSize,vImage);
+					for(int k=0;k<vImage.size();++k)
+					{
+						outVideo << vImage[k];
+					}
+					outVideo << frameB;
 				}
+			}
+			else{
+				cout << "duration error" << endl;
+				abort();
 			}
 		}
 
