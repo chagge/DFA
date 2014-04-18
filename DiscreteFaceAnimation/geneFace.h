@@ -22,7 +22,7 @@ struct GENEFACE
 	~GENEFACE(){};
 
 	void makeInterpFrame(const cv::Mat &imgA,const cv::Mat &imgB,const int frameNum,vector<cv::Mat> &vImage);
-	void makeSentense(const string &output);
+	void makeSentense(const string &output,const cv::Rect &rect);
 };
 
 #endif
