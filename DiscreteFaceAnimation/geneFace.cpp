@@ -82,11 +82,13 @@ void GENEFACE::makeInterpFrame(const cv::Mat &imgA,const cv::Mat &imgB,const int
 	}
 }
 
-void GENEFACE::makeSentense(const string &output)
+void GENEFACE::makeSentense(const string &output,const cv::Rect &rect)
 {
 	miniDist.minimizeDistortion();
 
-	cv::Size imgSize((int)(backMovie.get(CV_CAP_PROP_FRAME_WIDTH)),(int)(backMovie.get(CV_CAP_PROP_FRAME_HEIGHT)));
+	cv::Size imgSize;
+	if(rect==cv::Rect()) imgSize=cv::Size((int)(backMovie.get(CV_CAP_PROP_FRAME_WIDTH)),(int)(backMovie.get(CV_CAP_PROP_FRAME_HEIGHT)));
+	else imgSize=rect.size();
 	cv::VideoWriter outVideo(output,static_cast<int>(backMovie.get(CV_CAP_PROP_FOURCC)),static_cast<int>(backMovie.get(CV_CAP_PROP_FPS)),imgSize,true);
 	
 
@@ -105,7 +107,8 @@ void GENEFACE::makeSentense(const string &output)
 				cv::Mat frame;
 				backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame);
 				backMovie >> frame;
-				outVideo << frame;
+				if(rect==cv::Rect()) outVideo << frame;
+				else outVideo << frame(rect);
 				frameSize+=duration-1;
 			}
 			else if(i==miniDist.result.size()-1){
@@ -116,12 +119,15 @@ void GENEFACE::makeSentense(const string &output)
 					backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+j*(duration/(double)miniDist.result[i].actualSize));
 					backMovie >> frameB;
 					std::vector<cv::Mat> vImage;
-					makeInterpFrame(frameA,frameB,frameSize,vImage);
+					if(rect==cv::Rect()) makeInterpFrame(frameA,frameB,frameSize,vImage);
+					else makeInterpFrame(frameA(rect).clone(),frameB(rect).clone(),frameSize,vImage);
+					
 					for(int k=0;k<vImage.size();++k)
 					{
 						outVideo << vImage[k];
 					}
-					outVideo << frameB;
+					if(rect==cv::Rect()) outVideo << frameB;
+					else outVideo << frameB(rect);
 				}
 			}
 			else{
@@ -138,19 +144,22 @@ void GENEFACE::makeSentense(const string &output)
 				backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+2);
 				backMovie >> frameB;
 				std::vector<cv::Mat> vImage;
-				makeInterpFrame(frameA,frameB,frameSize,vImage);
+				if(rect==cv::Rect()) makeInterpFrame(frameA,frameB,frameSize,vImage);
+				else makeInterpFrame(frameA(rect).clone(),frameB(rect).clone(),frameSize,vImage);
 				for(int k=0;k<vImage.size();++k)
 				{
 					outVideo << vImage[k];
 				}
-				outVideo << frameB;
+				if(rect==cv::Rect()) outVideo << frameB;
+				else outVideo << frameB(rect);
 				inInterp=false;
 			}
 
 			if(j==duration-2){
 				backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].endFrame-2);
 				backMovie >> frameA;
-				outVideo << frameA;
+				if(rect==cv::Rect()) outVideo << frameA;
+				else outVideo << frameA(rect);
 				inInterp=true;
 				frameSize=1;
 			}
@@ -159,7 +168,8 @@ void GENEFACE::makeSentense(const string &output)
 				cv::Mat frame;
 				backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+j*(duration/(double)miniDist.result[i].actualSize));
 				backMovie >> frame;
-				outVideo << frame;
+				if(rect==cv::Rect()) outVideo << frame;
+				else outVideo << frame(rect);
 			}
 
 		}
