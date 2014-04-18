@@ -115,7 +115,7 @@ void localPatchMatch(int patchSize,int maxIterate,const cv::Mat& src,const vecto
 	{
 		for(int i=0;i<Ns;++i)
 		{
-			int curIndexSrc,curIndexTar;
+			int curIndexSrc;
 			int minD;
 			if(c%2==0){
 				curIndexSrc=i;											
@@ -642,7 +642,7 @@ void minimizeDAlphaDisCohere(int patchSize,int pyramidLevel,double alpha,const c
 		}
 		if(a!=pyramidLevel){
 			cv::pyrUp(tempTar[pyramidLevel-a],tempTar[pyramidLevel-a-1],tempTar[pyramidLevel-a-1].size());
-			maxIterate=18*(pyramidLevel-a-1)/pyramidLevel+2;
+			maxIterate=18*(pyramidLevel-(a+1))/pyramidLevel+2;
 		}
 	}
 }

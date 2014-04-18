@@ -90,89 +90,123 @@ void GENEFACE::makeSentense(const string &output,const cv::Rect &rect)
 	if(rect==cv::Rect()) imgSize=cv::Size((int)(backMovie.get(CV_CAP_PROP_FRAME_WIDTH)),(int)(backMovie.get(CV_CAP_PROP_FRAME_HEIGHT)));
 	else imgSize=rect.size();
 	cv::VideoWriter outVideo(output,static_cast<int>(backMovie.get(CV_CAP_PROP_FOURCC)),static_cast<int>(backMovie.get(CV_CAP_PROP_FPS)),imgSize,true);
-	
 
 	bool inInterp=false;
 	int frameSize=0;
 	cv::Mat frameA,frameB;
 
-	for(int i=0;i<5/*miniDist.result.size()*/;++i)
+	for(int i=0;i<miniDist.result.size();++i)
 	{
 		const int duration=miniDist.result[i].duration;
-		if(duration<3){
-			if(inInterp){
-				frameSize+=duration;
-			}
-			else if(i==0){
+		if(i%2==0){
+			for(int j=0;j<duration;++j)
+			{
 				cv::Mat frame;
-				backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame);
+				backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+j*(duration/(double)miniDist.result[i].actualSize));
 				backMovie >> frame;
-				if(rect==cv::Rect()) outVideo << frame;
-				else outVideo << frame(rect);
-				frameSize+=duration-1;
-			}
-			else if(i==miniDist.result.size()-1){
-				if(frameSize==0){cout << "frameSize is 0" << endl; abort;}
-				frameSize+=duration-1;
-				for(int j=0;j<duration-1;++j)
-				{
-					backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+j*(duration/(double)miniDist.result[i].actualSize));
-					backMovie >> frameB;
+				if(i!=0&&j==0){
+					if(rect==cv::Rect()) frameB=frame.clone();
+					else frameB=frame(rect).clone();
 					std::vector<cv::Mat> vImage;
-					if(rect==cv::Rect()) makeInterpFrame(frameA,frameB,frameSize,vImage);
-					else makeInterpFrame(frameA(rect).clone(),frameB(rect).clone(),frameSize,vImage);
-					
+					makeInterpFrame(frameA,frameB,frameSize,vImage);					
 					for(int k=0;k<vImage.size();++k)
 					{
 						outVideo << vImage[k];
 					}
-					if(rect==cv::Rect()) outVideo << frameB;
-					else outVideo << frameB(rect);
-				}
-			}
-			else{
-				cout << "duration error" << endl;
-				abort();
-			}
-		}
-
-		for(int j=0;j<duration;++j)
-		{
-			++frameSize;			
-
-			if(i!=0&&j==1){
-				backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+2);
-				backMovie >> frameB;
-				std::vector<cv::Mat> vImage;
-				if(rect==cv::Rect()) makeInterpFrame(frameA,frameB,frameSize,vImage);
-				else makeInterpFrame(frameA(rect).clone(),frameB(rect).clone(),frameSize,vImage);
-				for(int k=0;k<vImage.size();++k)
-				{
-					outVideo << vImage[k];
-				}
-				if(rect==cv::Rect()) outVideo << frameB;
-				else outVideo << frameB(rect);
-				inInterp=false;
-			}
-
-			if(j==duration-2){
-				backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].endFrame-2);
-				backMovie >> frameA;
-				if(rect==cv::Rect()) outVideo << frameA;
-				else outVideo << frameA(rect);
-				inInterp=true;
-				frameSize=1;
-			}
-
-			if(!inInterp){
-				cv::Mat frame;
-				backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+j*(duration/(double)miniDist.result[i].actualSize));
-				backMovie >> frame;
+				}				
 				if(rect==cv::Rect()) outVideo << frame;
-				else outVideo << frame(rect);
+				else outVideo << frame(rect);				
+				
+				if(j==duration-1){
+					if(rect==cv::Rect()) frameA=frame.clone();
+					else frameA=frame(rect).clone();
+				}
 			}
-
 		}
-
+		else{
+			frameSize=duration;
+		}
 	}
+
+	//for(int i=0;i<miniDist.result.size();++i)
+	//{
+	//	const int duration=miniDist.result[i].duration;
+	//	if(duration<4){
+	//		if(inInterp){
+	//			frameSize+=duration;
+	//		}
+	//		else if(i==0){
+	//			cv::Mat frame;
+	//			backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame);
+	//			backMovie >> frame;
+	//			if(rect==cv::Rect()) outVideo << frame;
+	//			else outVideo << frame(rect);
+	//			frameSize+=duration-1;
+	//		}
+	//		else if(i==miniDist.result.size()-1){
+	//			if(frameSize==0){cout << "frameSize is 0" << endl; abort();}
+	//			frameSize+=duration-1;
+	//			for(int j=0;j<duration-1;++j)
+	//			{
+	//				backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+j*(duration/(double)miniDist.result[i].actualSize));
+	//				backMovie >> frameB;
+	//				std::vector<cv::Mat> vImage;
+	//				if(rect==cv::Rect()) makeInterpFrame(frameA,frameB,frameSize,vImage);
+	//				else makeInterpFrame(frameA(rect).clone(),frameB(rect).clone(),frameSize,vImage);
+	//				
+	//				for(int k=0;k<vImage.size();++k)
+	//				{
+	//					outVideo << vImage[k];
+	//				}
+	//				if(rect==cv::Rect()) outVideo << frameB;
+	//				else outVideo << frameB(rect);
+	//			}
+	//		}
+	//		else{
+	//			cout << "duration error" << endl;
+	//			abort();
+	//		}
+
+	//		continue;
+	//	}
+
+	//	for(int j=0;j<duration;++j)
+	//	{
+	//		++frameSize;			
+
+	//		if(i!=0&&j==1){
+	//			backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+2);
+	//			backMovie >> frameB;
+	//			std::vector<cv::Mat> vImage;
+	//			if(rect==cv::Rect()) makeInterpFrame(frameA,frameB,frameSize,vImage);
+	//			else makeInterpFrame(frameA(rect).clone(),frameB(rect).clone(),frameSize,vImage);
+	//			for(int k=0;k<vImage.size();++k)
+	//			{
+	//				outVideo << vImage[k];
+	//			}
+	//			if(rect==cv::Rect()) outVideo << frameB;
+	//			else outVideo << frameB(rect);
+	//			inInterp=false;
+	//		}
+
+	//		if(j==duration-2){
+	//			backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].endFrame-2);
+	//			backMovie >> frameA;
+	//			if(rect==cv::Rect()) outVideo << frameA;
+	//			else outVideo << frameA(rect);
+	//			inInterp=true;
+	//			frameSize=1;
+	//		}
+
+	//		if(!inInterp){
+	//			cv::Mat frame;
+	//			backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+j*(duration/(double)miniDist.result[i].actualSize));
+	//			backMovie >> frame;
+	//			if(rect==cv::Rect()) outVideo << frame;
+	//			else outVideo << frame(rect);
+	//		}
+
+	//	}
+
+	//}
 }
