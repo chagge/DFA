@@ -94,7 +94,7 @@ void GENEFACE::makeSentense(const string &output)
 	int frameSize=0;
 	cv::Mat frameA,frameB;
 
-	for(int i=0;i<miniDist.result.size();++i)
+	for(int i=0;i<5/*miniDist.result.size()*/;++i)
 	{
 		const int duration=miniDist.result[i].duration;
 		if(duration<3){
@@ -132,25 +132,7 @@ void GENEFACE::makeSentense(const string &output)
 
 		for(int j=0;j<duration;++j)
 		{
-			++frameSize;
-
-			//if(j==1&&duration==3){ 
-			//	
-			//	backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+2);
-			//	backMovie >> frameB;
-			//	if(i!=0){
-			//		std::vector<cv::Mat> vImage;
-			//		makeInterpFrame(frameA,frameB,frameSize,vImage);
-			//		for(int k=0;k<vImage.size();++k)
-			//		{
-			//			outVideo << vImage[k];
-			//		}
-			//		outVideo << frameB;
-			//	}
-			//	frameA=frameB.clone();
-			//	frameSize=1;
-			//	continue;
-			//}
+			++frameSize;			
 
 			if(i!=0&&j==1){
 				backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+2);
@@ -163,7 +145,6 @@ void GENEFACE::makeSentense(const string &output)
 				}
 				outVideo << frameB;
 				inInterp=false;
-				continue;
 			}
 
 			if(j==duration-2){
@@ -172,7 +153,6 @@ void GENEFACE::makeSentense(const string &output)
 				outVideo << frameA;
 				inInterp=true;
 				frameSize=1;
-				continue;
 			}
 
 			if(!inInterp){
@@ -181,6 +161,7 @@ void GENEFACE::makeSentense(const string &output)
 				backMovie >> frame;
 				outVideo << frame;
 			}
+
 		}
 
 	}
