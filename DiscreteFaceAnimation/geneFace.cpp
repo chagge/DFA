@@ -11,6 +11,8 @@
 
 void GENEFACE::makeInterpFrame(const cv::Mat &imgA,const cv::Mat &imgB,const int frameNum,vector<cv::Mat> &vImage)
 {
+	if(frameNum==2){cout << "FrameNum==2" << endl; abort();}
+
 	cv::Mat imageA_Lab;
 	cv::Mat imageB_Lab;
 	cv::cvtColor(imgA,imageA_Lab,cv::COLOR_BGR2Lab);
@@ -95,13 +97,15 @@ void GENEFACE::makeSentense(const string &output,const cv::Rect &rect)
 	int frameSize=0;
 	cv::Mat frameA,frameB;
 
+	int count=0;
 	for(int i=0;i<miniDist.result.size();++i)
 	{
 		const int duration=miniDist.result[i].duration;
-		if(i%2==0){
+		if(count%2==0){
 			for(int j=0;j<duration;++j)
 			{
 				cv::Mat frame;
+				frameSize++;
 				backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+j*(duration/(double)miniDist.result[i].actualSize));
 				backMovie >> frame;
 				if(i!=0&&j==0){
@@ -121,10 +125,14 @@ void GENEFACE::makeSentense(const string &output,const cv::Rect &rect)
 					if(rect==cv::Rect()) frameA=frame.clone();
 					else frameA=frame(rect).clone();
 				}
+				frameSize=1;
 			}
+
+			++count;
 		}
 		else{
-			frameSize=duration;
+			frameSize+=duration;
+			if(frameSize>4) ++count;
 		}
 	}
 
