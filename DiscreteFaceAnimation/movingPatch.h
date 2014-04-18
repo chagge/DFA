@@ -1,3 +1,11 @@
+/*
+ *  movingPatch.h
+ *
+ *  Created by Shunsuke Saito on 3/25/14.
+ *  Copyright 2014 Shunsuke Saito. All rights reserved.
+ *
+ */
+
 #include <iostream>
 #include <iterator>
 #include <time.h>
