@@ -92,56 +92,58 @@ void GENEFACE::makeSentense(const string &output,const cv::Rect &rect)
 	if(rect==cv::Rect()) imgSize=cv::Size((int)(backMovie.get(CV_CAP_PROP_FRAME_WIDTH)),(int)(backMovie.get(CV_CAP_PROP_FRAME_HEIGHT)));
 	else imgSize=rect.size();
 	cv::VideoWriter outVideo(output,static_cast<int>(backMovie.get(CV_CAP_PROP_FOURCC)),static_cast<int>(backMovie.get(CV_CAP_PROP_FPS)),imgSize,true);
+	cout << "FPS: " << static_cast<int>(backMovie.get(CV_CAP_PROP_FPS)) << endl;
 
 	bool inInterp=false;
 	int frameSize=0;
 	cv::Mat frameA,frameB;
 
 	int count=0;
+	int frameNum=2;//for debug
 	for(int i=0;i<miniDist.result.size();++i)
 	{
 		const int duration=miniDist.result[i].duration;
-		cout << "Duration" << duration << endl;
-		//if(count%2==0){
-		//	if(duration>2){			
-		//		for(int j=0;j<duration;++j)
-		//		{
-		//			cv::Mat frame;
-		//			frameSize++;
-		//			backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+j*(duration/(double)miniDist.result[i].actualSize));
-		//			backMovie >> frame;
-		//			if(i!=0&&j==0){
-		//				if(rect==cv::Rect()) frameB=frame.clone();
-		//				else frameB=frame(rect).clone();
-		//				std::vector<cv::Mat> vImage;
-		//				makeInterpFrame(frameA,frameB,frameSize,vImage);					
-		//				for(int k=0;k<vImage.size();++k)
-		//				{
-		//					outVideo << vImage[k];
-		//				}
-		//			}				
-		//			if(rect==cv::Rect()) outVideo << frame;
-		//			else outVideo << frame(rect);				
-		//		
-		//			if(j==duration-1){
-		//				if(rect==cv::Rect()) frameA=frame.clone();
-		//				else frameA=frame(rect).clone();
-		//			}
-		//			frameSize=1;
-		//		}
-		//		++count;
-		//	}
-		//	else{
-		//		frameSize+=duration;
-		//	}			
-		//}
-		//else{
-		//	frameSize+=duration;
-		//	if(frameSize>4) ++count;
-		//}
-	}
-	getchar();
+		if(count%2==0){
+			if(duration>2){			
+				for(int j=0;j<duration;++j)
+				{
+					cv::Mat frame;
+					backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+j*(duration/(double)miniDist.result[i].actualSize));
+					backMovie >> frame;
+					if(i!=0&&j==0){
+						if(rect==cv::Rect()) frameB=frame.clone();
+						else frameB=frame(rect).clone();
+						std::vector<cv::Mat> vImage;
+						makeInterpFrame(frameA,frameB,frameSize,vImage);					
+						for(int k=0;k<vImage.size();++k)
+						{
+							outVideo << vImage[k];
+							frameNum++;
+						}
+					}				
+					if(rect==cv::Rect()) outVideo << frame;
+					else outVideo << frame(rect);				
+					frameNum++;
 
+					if(j==duration-1){
+						if(rect==cv::Rect()) frameA=frame.clone();
+						else frameA=frame(rect).clone();
+						frameSize=2;
+					}					
+				}
+				++count;
+			}
+			else{
+				frameSize+=duration;
+			}			
+		}
+		else{
+			frameSize+=duration;
+			if(frameSize>4) ++count;
+		}
+	}
+	cout << "FrameNum: " << frameNum << endl;
+	getchar();
 	//for(int i=0;i<miniDist.result.size();++i)
 	//{
 	//	const int duration=miniDist.result[i].duration;
