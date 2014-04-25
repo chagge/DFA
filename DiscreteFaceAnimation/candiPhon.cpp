@@ -40,6 +40,7 @@ bool CANDIPHON::readPhonemeFile(const std::string &filename)
 	std::string str;
 	std::vector<std::string> token;
 
+	bool isEven=true;
 	while( !in.eof() ) {
 		// read the line of the file
 		in.getline(rline, MAX_READ_LINE);
@@ -82,12 +83,16 @@ bool CANDIPHON::readPhonemeFile(const std::string &filename)
 			phoneme.startFrame=atoi( sub_token[0][0].c_str())/2;//value is doubled 
 			phoneme.endFrame=atoi( sub_token[0][1].c_str())/2;//value is doubled
 
-			phoneme.duration=1+atoi( sub_token[1][0].c_str())/2;//value is doubled
+			int duration=atoi(sub_token[1][0].c_str());
+			if(duration%2==0) phoneme.duration=duration/2;
+			else{
+				if(isEven){ phoneme.duration=duration/2; isEven=false;}
+				else{ phoneme.duration=1+duration/2; isEven=true;}
+			}
 			phoneme.actualSize=atoi( sub_token[1][1].c_str())/2;//value is doubled
 
 			sPhonSeq.push_back(phoneme);
 		}
-
 	}
 
 	vSetPhon.push_back(sPhonSeq);
