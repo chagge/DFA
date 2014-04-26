@@ -101,46 +101,44 @@ void GENEFACE::makeSentense(const string &output,const cv::Rect &rect)
 	for(int i=0;i<miniDist.result.size();++i)
 	{
 		const int duration=miniDist.result[i].duration;
-		cout << "Duration" << duration << endl;
-		//if(count%2==0){
-		//	if(duration>2){			
-		//		for(int j=0;j<duration;++j)
-		//		{
-		//			cv::Mat frame;
-		//			frameSize++;
-		//			backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+j*(duration/(double)miniDist.result[i].actualSize));
-		//			backMovie >> frame;
-		//			if(i!=0&&j==0){
-		//				if(rect==cv::Rect()) frameB=frame.clone();
-		//				else frameB=frame(rect).clone();
-		//				std::vector<cv::Mat> vImage;
-		//				makeInterpFrame(frameA,frameB,frameSize,vImage);					
-		//				for(int k=0;k<vImage.size();++k)
-		//				{
-		//					outVideo << vImage[k];
-		//				}
-		//			}				
-		//			if(rect==cv::Rect()) outVideo << frame;
-		//			else outVideo << frame(rect);				
-		//		
-		//			if(j==duration-1){
-		//				if(rect==cv::Rect()) frameA=frame.clone();
-		//				else frameA=frame(rect).clone();
-		//			}
-		//			frameSize=1;
-		//		}
-		//		++count;
-		//	}
-		//	else{
-		//		frameSize+=duration;
-		//	}			
-		//}
-		//else{
-		//	frameSize+=duration;
-		//	if(frameSize>4) ++count;
-		//}
+		if(count%2==0){
+			if(duration>2){			
+				for(int j=0;j<duration;++j)
+				{
+					cv::Mat frame;
+					frameSize++;
+					backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+j*(duration/(double)miniDist.result[i].actualSize));
+					backMovie >> frame;
+					if(i!=0&&j==0){
+						if(rect==cv::Rect()) frameB=frame.clone();
+						else frameB=frame(rect).clone();
+						std::vector<cv::Mat> vImage;
+						makeInterpFrame(frameA,frameB,frameSize,vImage);					
+						for(int k=0;k<vImage.size();++k)
+						{
+							outVideo << vImage[k];
+						}
+					}				
+					if(rect==cv::Rect()) outVideo << frame;
+					else outVideo << frame(rect);				
+				
+					if(j==duration-1){
+						if(rect==cv::Rect()) frameA=frame.clone();
+						else frameA=frame(rect).clone();
+					}
+					frameSize=1;
+				}
+				++count;
+			}
+			else{
+				frameSize+=duration;
+			}			
+		}
+		else{
+			frameSize+=duration;
+			if(frameSize>4) ++count;
+		}
 	}
-	getchar();
 
 	//for(int i=0;i<miniDist.result.size();++i)
 	//{
