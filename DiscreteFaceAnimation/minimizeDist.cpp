@@ -111,5 +111,27 @@ void MINIMIZEDISTORTION::minimizeDistortion()
 		result[i].showValue();
 	}
 
+	//compute offset vector
+	computeOffsetVec();
+}
 
+void MINIMIZEDISTORTION::computeOffsetVec(){
+	offsetVec.resize(result.size()-1);
+
+	//Adding the error of position
+	cv::Point2f offset;
+	for(int i=0;i<result.size()-1;++i)
+	{
+		int midFramePrev=result[i].getMiddle();
+		int midFrameFore=result[i+1].getMiddle();
+		offset = commonPointsMat.at<cv::Point2f>(0,midFrameFore)-commonPointsMat.at<cv::Point2f>(0,midFramePrev);
+		offset += commonPointsMat.at<cv::Point2f>(12,midFrameFore)-commonPointsMat.at<cv::Point2f>(12,midFramePrev);
+		offset += commonPointsMat.at<cv::Point2f>(13,midFrameFore)-commonPointsMat.at<cv::Point2f>(13,midFramePrev);
+		offset += commonPointsMat.at<cv::Point2f>(14,midFrameFore)-commonPointsMat.at<cv::Point2f>(14,midFramePrev);
+		offset *= 0.25;
+
+		offsetVec[i] = offset;
+		cout << offset << endl;
+	}
+	getchar();
 }

@@ -30,12 +30,13 @@ struct MINIMIZEDISTORTION
 {
 	CANDIPHON candidate;
 	cv::Mat commonPointsMat;
+	std::vector<PHONSEQ> result;
+	std::vector<cv::Point> offsetVec;
 
 	MINIMIZEDISTORTION(const string &ymlfile,const int candidateNum): candidate(candidateNum){
 		readYML(ymlfile);		
 	}
 	~MINIMIZEDISTORTION(){};
-	std::vector<PHONSEQ> result;
 
 	void readYML(const string &ymlfile){
 		std::cout << "Reading YML..." << std::endl;
@@ -44,6 +45,7 @@ struct MINIMIZEDISTORTION
 		std::cout << "Done..." << std::endl;
 	}
 	void minimizeDistortion();
+	void computeOffsetVec();
 };
 
 #endif
