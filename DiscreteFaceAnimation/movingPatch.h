@@ -18,14 +18,14 @@ using namespace std;
 
 #ifdef _DEBUG
     //Debugモードの場合
-    #pragma comment(lib,"opencv_core248d.lib")
-    #pragma comment(lib,"opencv_imgproc248d.lib")
-    #pragma comment(lib,"opencv_highgui248d.lib")
+    #pragma comment(lib,"opencv_core249d.lib")
+    #pragma comment(lib,"opencv_imgproc249d.lib")
+    #pragma comment(lib,"opencv_highgui249d.lib")
 #else
     //Releaseモードの場合
-    #pragma comment(lib,"opencv_core248.lib")
-    #pragma comment(lib,"opencv_imgproc248.lib")
-    #pragma comment(lib,"opencv_highgui248.lib")
+    #pragma comment(lib,"opencv_core249.lib")
+    #pragma comment(lib,"opencv_imgproc249.lib")
+    #pragma comment(lib,"opencv_highgui249.lib")
 #endif
 
 namespace cv{
@@ -614,7 +614,7 @@ void minimizeDAlphaDisCohere(int patchSize,int pyramidLevel,double alpha,const c
 			
 			//vote Src1 to Tar
 			multimap<int,int>::iterator it=SSD.begin();
-			int threIndex = Nt*alpha;
+			int threIndex = (int)(Nt*alpha);
 			for(int i=0;i<Nt;++i)
 			{
 				cv::Mat patchSrc;
@@ -686,7 +686,7 @@ void smootingPatch(int patchSize,int maxIterate,const cv::Mat& src,const vector<
 					int tarIndexSrc=_patchIndexSrc[curIndexSrc-(widthSrc-patchSize+1)]+(widthSrc-patchSize+1);
 					if(tarIndexSrc<Ns&&tarIndexSrc>=0){
 						cv::Point2i upDiff=pointSrc[curIndexSrc]-pointSrc[_patchIndexTar[tarIndexSrc]];
-						int tmpDist=upDiff.ddot(upDiff);
+						int tmpDist=(int)upDiff.ddot(upDiff);
 						int tmpSSD=cv::SSD(patchSrc[curIndexSrc],patchTar[tarIndexSrc]);
 						if(/*tmpSSD<minSSDSrc&&*/tmpDist<minDistSrc){minDistSrc=tmpDist;minSSDSrc=tmpSSD;_patchIndexSrc[curIndexSrc]=tarIndexSrc;}
 					}
@@ -694,7 +694,7 @@ void smootingPatch(int patchSize,int maxIterate,const cv::Mat& src,const vector<
 					int tarIndexTar=_patchIndexTar[curIndexTar-(widthSrc-patchSize+1)]+(widthSrc-patchSize+1);
 					if(tarIndexTar<Ns&&tarIndexTar>=0){
 						cv::Point2i upDiff=pointTar[curIndexTar]-pointTar[_patchIndexSrc[tarIndexTar]];
-						int tmpDist=upDiff.ddot(upDiff);
+						int tmpDist=(int)upDiff.ddot(upDiff);
 						int tmpSSD=cv::SSD(patchTar[curIndexTar],patchSrc[tarIndexTar]);
 						if(/*tmpSSD<minSSDTar&&*/tmpDist<minDistTar){minDistTar=tmpDist;minSSDTar=tmpSSD;_patchIndexTar[curIndexTar]=tarIndexTar;}
 					}
@@ -703,7 +703,7 @@ void smootingPatch(int patchSize,int maxIterate,const cv::Mat& src,const vector<
 					int	tarIndexSrc=_patchIndexSrc[curIndexSrc-1]+1;
 					if(tarIndexSrc<Ns&&tarIndexSrc>=0){
 						cv::Point2i leftDiff=pointSrc[curIndexSrc]-pointSrc[_patchIndexTar[tarIndexSrc]];
-						int tmpDist=leftDiff.ddot(leftDiff);
+						int tmpDist=(int)leftDiff.ddot(leftDiff);
 						int tmpSSD=cv::SSD(patchSrc[curIndexSrc],patchTar[tarIndexSrc]);
 						if(/*tmpSSD<minSSDSrc&&*/tmpDist<minDistSrc){minDistSrc=tmpDist;minSSDSrc=tmpSSD;_patchIndexSrc[curIndexSrc]=tarIndexSrc;}
 					}
@@ -711,7 +711,7 @@ void smootingPatch(int patchSize,int maxIterate,const cv::Mat& src,const vector<
 					int tarIndexTar=_patchIndexTar[curIndexTar-1]+1;
 					if(tarIndexTar<Ns&&tarIndexTar>=0){
 						cv::Point2i leftDiff=pointTar[curIndexTar]-pointTar[_patchIndexSrc[tarIndexTar]];
-						int tmpDist=leftDiff.ddot(leftDiff);
+						int tmpDist=(int)leftDiff.ddot(leftDiff);
 						int tmpSSD=cv::SSD(patchTar[curIndexTar],patchSrc[tarIndexTar]);
 						if(/*tmpSSD<minSSDTar&&*/tmpDist<minDistTar){minDistTar=tmpDist;minSSDTar=tmpSSD;_patchIndexTar[curIndexTar]=tarIndexTar;}
 					}
@@ -727,7 +727,7 @@ void smootingPatch(int patchSize,int maxIterate,const cv::Mat& src,const vector<
 					int tarIndexSrc=_patchIndexSrc[curIndexSrc+(widthSrc-patchSize+1)]-(widthSrc-patchSize+1);
 					if(tarIndexSrc<Ns&&tarIndexSrc>=0){
 						cv::Point2i belowDiff=pointSrc[curIndexSrc]-pointSrc[_patchIndexTar[tarIndexSrc]];
-						int tmpDist=belowDiff.ddot(belowDiff);
+						int tmpDist=(int)belowDiff.ddot(belowDiff);
 						int tmpSSD=cv::SSD(patchSrc[curIndexSrc],patchTar[tarIndexSrc]);
 						if(/*tmpSSD<minSSDSrc&&*/tmpDist<minDistSrc){minDistSrc=tmpDist;minSSDSrc=tmpSSD;_patchIndexSrc[curIndexSrc]=tarIndexSrc;}
 					}
@@ -735,7 +735,7 @@ void smootingPatch(int patchSize,int maxIterate,const cv::Mat& src,const vector<
 					int tarIndexTar=_patchIndexTar[curIndexTar+(widthSrc-patchSize+1)]-(widthSrc-patchSize+1);
 					if(tarIndexTar<Ns&&tarIndexTar>=0){
 						cv::Point2i belowDiff=pointTar[curIndexTar]-pointTar[_patchIndexSrc[tarIndexTar]];
-						int tmpDist=belowDiff.ddot(belowDiff);
+						int tmpDist=(int)belowDiff.ddot(belowDiff);
 						int tmpSSD=cv::SSD(patchTar[curIndexTar],patchSrc[tarIndexTar]);
 						if(/*tmpSSD<minSSDTar&&*/tmpDist<minDistTar){minDistTar=tmpDist;minSSDTar=tmpSSD;_patchIndexTar[curIndexTar]=tarIndexTar;}
 					}
@@ -744,7 +744,7 @@ void smootingPatch(int patchSize,int maxIterate,const cv::Mat& src,const vector<
 					int	tarIndexSrc=_patchIndexSrc[curIndexSrc+1]-1;
 					if(tarIndexSrc<Ns&&tarIndexSrc>=0){
 						cv::Point2i rightDiff=pointSrc[curIndexSrc]-pointSrc[_patchIndexTar[tarIndexSrc]];
-						int tmpDist=rightDiff.ddot(rightDiff);
+						int tmpDist=(int)rightDiff.ddot(rightDiff);
 						int tmpSSD=cv::SSD(patchSrc[curIndexSrc],patchTar[tarIndexSrc]);
 						if(/*tmpSSD<minSSDSrc&&*/tmpDist<minDistSrc){minDistSrc=tmpDist;minSSDSrc=tmpSSD;_patchIndexSrc[curIndexSrc]=tarIndexSrc;}
 					}
@@ -752,7 +752,7 @@ void smootingPatch(int patchSize,int maxIterate,const cv::Mat& src,const vector<
 					int tarIndexTar=_patchIndexTar[curIndexTar+1]-1;
 					if(tarIndexTar<Ns&&tarIndexTar>=0){
 						cv::Point2i rightDiff=pointTar[curIndexTar]-pointTar[_patchIndexSrc[tarIndexTar]];
-						int tmpDist=rightDiff.ddot(rightDiff);
+						int tmpDist=(int)rightDiff.ddot(rightDiff);
 						int tmpSSD=cv::SSD(patchTar[curIndexTar],patchSrc[tarIndexTar]);
 						if(/*tmpSSD<minSSDTar&&*/tmpDist<minDistTar){minDistTar=tmpDist;minSSDTar=tmpSSD;_patchIndexTar[curIndexTar]=tarIndexTar;}
 					}

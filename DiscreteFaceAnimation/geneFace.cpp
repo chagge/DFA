@@ -98,6 +98,7 @@ void GENEFACE::makeSentense(const string &output,const cv::Rect &rect)
 	cv::Mat frameA,frameB;
 
 	int count=0;
+	int frameNum=2;//for debug
 	for(int i=0;i<miniDist.result.size();++i)
 	{
 		const int duration=miniDist.result[i].duration;
@@ -107,6 +108,7 @@ void GENEFACE::makeSentense(const string &output,const cv::Rect &rect)
 				{
 					cv::Mat frame;
 					frameSize++;
+
 					backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+j*(duration/(double)miniDist.result[i].actualSize));
 					backMovie >> frame;
 					if(i!=0&&j==0){
@@ -117,6 +119,9 @@ void GENEFACE::makeSentense(const string &output,const cv::Rect &rect)
 						for(int k=0;k<vImage.size();++k)
 						{
 							outVideo << vImage[k];
+
+							frameNum++;
+
 						}
 					}				
 					if(rect==cv::Rect()) outVideo << frame;
@@ -127,6 +132,13 @@ void GENEFACE::makeSentense(const string &output,const cv::Rect &rect)
 						else frameA=frame(rect).clone();
 					}
 					frameSize=1;
+					frameNum++;
+
+					if(j==duration-1){
+						if(rect==cv::Rect()) frameA=frame.clone();
+						else frameA=frame(rect).clone();
+						frameSize=2;
+					}					
 				}
 				++count;
 			}

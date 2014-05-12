@@ -16,14 +16,14 @@
 
 #ifdef _DEBUG
     //Debugモードの場合
-    #pragma comment(lib,"opencv_core248d.lib")
-    #pragma comment(lib,"opencv_imgproc248d.lib")
-    #pragma comment(lib,"opencv_highgui248d.lib")
+    #pragma comment(lib,"opencv_core249d.lib")
+    #pragma comment(lib,"opencv_imgproc249d.lib")
+    #pragma comment(lib,"opencv_highgui249d.lib")
 #else
     //Releaseモードの場合
-    #pragma comment(lib,"opencv_core248.lib")
-    #pragma comment(lib,"opencv_imgproc248.lib")
-    #pragma comment(lib,"opencv_highgui248.lib")
+    #pragma comment(lib,"opencv_core249.lib")
+    #pragma comment(lib,"opencv_imgproc249.lib")
+    #pragma comment(lib,"opencv_highgui249.lib")
 #endif
 
 struct MINIMIZEDISTORTION
