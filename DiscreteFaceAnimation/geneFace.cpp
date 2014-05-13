@@ -9,7 +9,7 @@
 #include "geneFace.h"
 #include "movingPatch.h"
 
-void GENEFACE::makeInterpFrame(const cv::Mat &imgA,const cv::Mat &imgB,const int frameNum,vector<cv::Mat> &vImage)
+void GENEFACE::makeInterpFrame(const cv::Mat &imgA,const cv::Mat &imgB,const int frameNum,vector<cv::Mat> &vImage,cv::Point &offset,cv::Point &trans)
 {
 	if(frameNum==2){cout << "FrameNum==2" << endl; abort();}
 
@@ -26,53 +26,53 @@ void GENEFACE::makeInterpFrame(const cv::Mat &imgA,const cv::Mat &imgB,const int
 	
 	//Initailize 
 	vector<cv::Mat> vFrame;
-	movingPatch(15,frameNum,vImageA[scaleDown],vImageB[scaleDown],vFrame);
+	movingPatch(15,frameNum,vImageA[scaleDown],vImageB[scaleDown],vFrame,offset,trans);
 
-	int maxIterate=1;
-	for(int a=0;a<=scaleDown;++a)
-	{
-		cout << "Scale: " << a << endl;
-		for(int b=0;b<maxIterate;++b)
-		{
-			cout << "Iteration: " << b << endl;
-			cout << "Frame: ";
-			for(int i=1;i<frameNum-1;++i)
-			{
-				cout << i << " ";
-				double alpha=(frameNum-i)/(double)frameNum;
+	//int maxIterate=1;
+	//for(int a=0;a<=scaleDown;++a)
+	//{
+	//	cout << "Scale: " << a << endl;
+	//	for(int b=0;b<maxIterate;++b)
+	//	{
+	//		cout << "Iteration: " << b << endl;
+	//		cout << "Frame: ";
+	//		for(int i=1;i<frameNum-1;++i)
+	//		{
+	//			cout << i << " ";
+	//			double alpha=(frameNum-i)/(double)frameNum;
 
-				//Compute T3
-				cout << "Computing T3" << endl;
-				cv::Mat T3=vFrame[i].clone();
-				minimizeDistComp(5,0,vFrame[0],T3);
+	//			//Compute T3
+	//			cout << "Computing T3" << endl;
+	//			cv::Mat T3=vFrame[i].clone();
+	//			minimizeDistComp(5,0,vFrame[0],T3);
 
-				//Compute T4
-				cout << "Computing T4" << endl;
-				cv::Mat T4=vFrame[i].clone();
-				minimizeDistComp(5,0,vFrame[frameNum-1],T4);
+	//			//Compute T4
+	//			cout << "Computing T4" << endl;
+	//			cv::Mat T4=vFrame[i].clone();
+	//			minimizeDistComp(5,0,vFrame[frameNum-1],T4);
 
-				//Compute T5
-				cout << "Computing T5" << endl;
-				cv::Mat T5=vFrame[i].clone();
-				minimizeDAlphaDisCohere(patchSize,0,alpha,vFrame[0],vFrame[frameNum-1],T5);
+	//			//Compute T5
+	//			cout << "Computing T5" << endl;
+	//			cv::Mat T5=vFrame[i].clone();
+	//			minimizeDAlphaDisCohere(patchSize,0,alpha,vFrame[0],vFrame[frameNum-1],T5);
 
-				//Add T1~5
-				vFrame[i]=beta*alpha*T3+beta*(1.0-alpha)*T4+(1.0-beta)*T5;
-			}
-			cout << endl;
-		}
+	//			//Add T1~5
+	//			vFrame[i]=beta*alpha*T3+beta*(1.0-alpha)*T4+(1.0-beta)*T5;
+	//		}
+	//		cout << endl;
+	//	}
 
-		if(a!=scaleDown){
-			//Upscaling
-			for(int c=1;c<frameNum-1;++c)
-			{
-				cv::resize(vFrame[c],vFrame[c],vImageA[scaleDown-a-1].size(),cv::INTER_LANCZOS4);
-			}
-			vFrame[0]=vImageA[scaleDown-a-1].clone(); 
-			vFrame[frameNum-1]=vImageB[scaleDown-a-1].clone();
-			maxIterate=6*(scaleDown-a-1)/scaleDown+2;
-		}
-	}
+	//	if(a!=scaleDown){
+	//		//Upscaling
+	//		for(int c=1;c<frameNum-1;++c)
+	//		{
+	//			cv::resize(vFrame[c],vFrame[c],vImageA[scaleDown-a-1].size(),cv::INTER_LANCZOS4);
+	//		}
+	//		vFrame[0]=vImageA[scaleDown-a-1].clone(); 
+	//		vFrame[frameNum-1]=vImageB[scaleDown-a-1].clone();
+	//		maxIterate=6*(scaleDown-a-1)/scaleDown+2;
+	//	}
+	//}
 
 	cout << "Save Image..." << endl;
 	//Save Image
@@ -99,9 +99,11 @@ void GENEFACE::makeSentense(const string &output,const cv::Rect &rect)
 
 	int count=0;
 	int frameNum=2;//for debug
+	cv::Point trans(0,0);
 	for(int i=0;i<miniDist.result.size();++i)
 	{
 		const int duration=miniDist.result[i].duration;
+		
 		if(count%2==0){
 			if(duration>2){			
 				for(int j=0;j<duration;++j)
@@ -115,7 +117,7 @@ void GENEFACE::makeSentense(const string &output,const cv::Rect &rect)
 						if(rect==cv::Rect()) frameB=frame.clone();
 						else frameB=frame(rect).clone();
 						std::vector<cv::Mat> vImage;
-						makeInterpFrame(frameA,frameB,frameSize,vImage);					
+						makeInterpFrame(frameA,frameB,frameSize,vImage,miniDist.offsetVec[i-1],trans);					
 						for(int k=0;k<vImage.size();++k)
 						{
 							outVideo << vImage[k];
@@ -150,6 +152,7 @@ void GENEFACE::makeSentense(const string &output,const cv::Rect &rect)
 			frameSize+=duration;
 			if(frameSize>4) ++count;
 		}
+		if(i!=0) trans += miniDist.offsetVec[i-1];
 	}
 
 	//for(int i=0;i<miniDist.result.size();++i)

@@ -130,8 +130,6 @@ void MINIMIZEDISTORTION::computeOffsetVec(){
 		offset += commonPointsMat.at<cv::Point2f>(14,midFrameFore)-commonPointsMat.at<cv::Point2f>(14,midFramePrev);
 		offset *= 0.25;
 
-		offsetVec[i] = offset;
-		cout << offset << endl;
+		offsetVec[i] = (cv::Point)offset;		
 	}
-	getchar();
 }

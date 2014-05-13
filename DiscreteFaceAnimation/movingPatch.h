@@ -763,7 +763,7 @@ void smootingPatch(int patchSize,int maxIterate,const cv::Mat& src,const vector<
 }
 
 //Interpolation
-void movingPatch(const int patchSize,const int frameNum,const cv::Mat &imgA,const cv::Mat &imgB,vector<cv::Mat> &vImg)
+void movingPatch(const int patchSize,const int frameNum,const cv::Mat &imgA,const cv::Mat &imgB,vector<cv::Mat> &vImg,cv::Point &offset,cv::Point &trans)
 {
 	vector<int> patchIndexA;
 	vector<int> patchIndexB;
@@ -799,8 +799,8 @@ void movingPatch(const int patchSize,const int frameNum,const cv::Mat &imgA,cons
 	vOffsetB.resize(Ns);
 	for(int i=0;i<pointA.size();++i)
 	{
-		vOffsetA[i]=pointB[patchIndexA[i]]-pointA[i];
-		vOffsetB[i]=pointA[patchIndexB[i]]-pointB[i];
+		vOffsetA[i]=pointB[patchIndexA[i]]-pointA[i]-offset;
+		vOffsetB[i]=pointA[patchIndexB[i]]-pointB[i]+offset;
 	}
 
 	cv::Mat img4Vote(imgA.size(),CV_64FC3);
@@ -816,35 +816,38 @@ void movingPatch(const int patchSize,const int frameNum,const cv::Mat &imgA,cons
 		img4Vote.setTo(cv::Vec3d(0,0,0));
 		voteNumA.setTo(0);
 		voteNumB.setTo(0);
-
 		vImg[a]=imgA.clone();
-		//vote Src to Tar
+
+		//PatchMove from A to B
 		for(int i=0;i<patchA.size();++i)
 		{
 			cv::Point midOffset(a*vOffsetA[i].x/(frameNum-1),a*vOffsetA[i].y/(frameNum-1)); 
 			int BIndex=(pointA[i].y+midOffset.y)*(vImg[a].cols-patchSize+1)+pointA[i].x+midOffset.x;
-
+			if(BIndex > pointB.size() || BIndex < 0) continue;
 			for(int k=0;k<patchSize;++k)
 			{
 				for(int l=0;l<patchSize;++l)
 				{						
-					img4Vote.at<cv::Vec3d>(pointB[BIndex]+cv::Point(k,l))+=patchA[i].at<cv::Vec3b>(cv::Point(k,l));
-					voteNumA.at<int>(pointB[BIndex]+cv::Point(k,l))+=1;
+					if(pointB[BIndex].x+k+trans.x < 0 || pointB[BIndex].x+k+trans.x >= img4Vote.cols || pointB[BIndex].y+l+trans.y < 0 || pointB[BIndex].y+l+trans.y >= img4Vote.rows) continue;
+					img4Vote.at<cv::Vec3d>(pointB[BIndex]+cv::Point(k,l)+trans)+=patchA[i].at<cv::Vec3b>(cv::Point(k,l));
+					voteNumA.at<int>(pointB[BIndex]+cv::Point(k,l)+trans)+=1;
 				}
 			}
 		}
 
+		//PatchMove from B to A
 		for(int i=0;i<patchB.size();++i)
 		{
 			cv::Point midOffset((frameNum-1-a)*vOffsetB[i].x/(frameNum-1),(frameNum-1-a)*vOffsetB[i].y/(frameNum-1)); 
 			int AIndex=(pointB[i].y+midOffset.y)*(vImg[a].cols-patchSize+1)+pointB[i].x+midOffset.x;
-
+			if(AIndex > pointA.size() || AIndex < 0) continue;
 			for(int k=0;k<patchSize;++k)
 			{
 				for(int l=0;l<patchSize;++l)
 				{						
-					img4Vote.at<cv::Vec3d>(pointA[AIndex]+cv::Point(k,l))+=patchB[i].at<cv::Vec3b>(cv::Point(k,l));
-					voteNumB.at<int>(pointA[AIndex]+cv::Point(k,l))+=1;
+					if(pointA[AIndex].x+k+trans.x < 0 || pointA[AIndex].x+k+trans.x >= imgA.cols || pointA[AIndex].y+l+trans.y < 0 || pointA[AIndex].y+l+trans.y >= imgA.rows) continue;
+					img4Vote.at<cv::Vec3d>(pointA[AIndex]+cv::Point(k,l)+trans)+=patchB[i].at<cv::Vec3b>(cv::Point(k,l));
+					voteNumB.at<int>(pointA[AIndex]+cv::Point(k,l)+trans)+=1;
 				}
 			}
 		}
