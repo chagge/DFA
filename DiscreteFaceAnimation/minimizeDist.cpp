@@ -39,20 +39,16 @@ void MINIMIZEDISTORTION::minimizeDistortion()
 				double curE=0.0;
 				
 				//Adding the error of position
-				cv::Point2f ptF[4],ptB[4];
+				cv::Point2f ptF[2],ptB[2];
 				int backEndFrame=candidate.vSetPhon[data[i-1]][i-1].endFrame;
 				int foreStartFrame=candidate.vSetPhon[j][i].startFrame;
 				ptB[0] = commonPointsMat.at<cv::Point2f>(0,backEndFrame);
 				ptB[1] = commonPointsMat.at<cv::Point2f>(12,backEndFrame);
-				ptB[2] = commonPointsMat.at<cv::Point2f>(13,backEndFrame);
-				ptB[3] = commonPointsMat.at<cv::Point2f>(14,backEndFrame);
 
 				ptF[0] = commonPointsMat.at<cv::Point2f>(0,foreStartFrame);
 				ptF[1] = commonPointsMat.at<cv::Point2f>(12,foreStartFrame);
-				ptF[2] = commonPointsMat.at<cv::Point2f>(13,foreStartFrame);
-				ptF[3] = commonPointsMat.at<cv::Point2f>(14,foreStartFrame);
 
-				for(int k=0;k<4;++k)
+				for(int k=0;k<2;++k)
 				{
 					cv::Point2f diff=ptF[k]-ptB[k];
 					curE+=diff.ddot(diff);
@@ -60,22 +56,18 @@ void MINIMIZEDISTORTION::minimizeDistortion()
 
 				//coherence term
 				if(i>1){
-					cv::Point2f ptBB[4],ptBF[4];
+					cv::Point2f ptBB[2],ptBF[2];
 	
 					int bbackEndFrame=candidate.vSetPhon[data[i-2]][i-2].endFrame;
 					int backStartFrame=candidate.vSetPhon[data[i-1]][i-1].startFrame;
 
 					ptBB[0] = commonPointsMat.at<cv::Point2f>(0,bbackEndFrame);
 					ptBB[1] = commonPointsMat.at<cv::Point2f>(12,bbackEndFrame);
-					ptBB[2] = commonPointsMat.at<cv::Point2f>(13,bbackEndFrame);
-					ptBB[3] = commonPointsMat.at<cv::Point2f>(14,bbackEndFrame);
 
 					ptBF[0] = commonPointsMat.at<cv::Point2f>(0,backStartFrame);
 					ptBF[1] = commonPointsMat.at<cv::Point2f>(12,backStartFrame);
-					ptBF[2] = commonPointsMat.at<cv::Point2f>(13,backStartFrame);
-					ptBF[3] = commonPointsMat.at<cv::Point2f>(14,backStartFrame);
 
-					for(int k=0;k<4;++k)
+					for(int k=0;k<2;++k)
 					{
 						cv::Point2f diff=ptF[k]-ptB[k]-(ptBF[k]-ptBB[k]);
 						curE+=diff.ddot(diff);
@@ -126,10 +118,16 @@ void MINIMIZEDISTORTION::computeOffsetVec(){
 		int midFrameFore=result[i+1].getMiddle();
 		offset = commonPointsMat.at<cv::Point2f>(0,midFrameFore)-commonPointsMat.at<cv::Point2f>(0,midFramePrev);
 		offset += commonPointsMat.at<cv::Point2f>(12,midFrameFore)-commonPointsMat.at<cv::Point2f>(12,midFramePrev);
-		offset += commonPointsMat.at<cv::Point2f>(13,midFrameFore)-commonPointsMat.at<cv::Point2f>(13,midFramePrev);
-		offset += commonPointsMat.at<cv::Point2f>(14,midFrameFore)-commonPointsMat.at<cv::Point2f>(14,midFramePrev);
-		offset *= 0.25;
+		offset *= 0.5;
 
 		offsetVec[i] = (cv::Point)offset;		
 	}
+
+	int frameNum=0;
+	for(int i=0;i<result.size();++i)
+	{
+		frameNum += result[i].duration;
+	}
+	cout << frameNum << endl;
+	getchar();
 }

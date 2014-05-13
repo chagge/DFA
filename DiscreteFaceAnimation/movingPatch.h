@@ -799,8 +799,8 @@ void movingPatch(const int patchSize,const int frameNum,const cv::Mat &imgA,cons
 	vOffsetB.resize(Ns);
 	for(int i=0;i<pointA.size();++i)
 	{
-		vOffsetA[i]=pointB[patchIndexA[i]]-pointA[i]-offset;
-		vOffsetB[i]=pointA[patchIndexB[i]]-pointB[i]+offset;
+		vOffsetA[i]=pointB[patchIndexA[i]]-pointA[i];
+		vOffsetB[i]=pointA[patchIndexB[i]]-pointB[i];
 	}
 
 	cv::Mat img4Vote(imgA.size(),CV_64FC3);
@@ -828,9 +828,13 @@ void movingPatch(const int patchSize,const int frameNum,const cv::Mat &imgA,cons
 			{
 				for(int l=0;l<patchSize;++l)
 				{						
-					if(pointB[BIndex].x+k+trans.x < 0 || pointB[BIndex].x+k+trans.x >= img4Vote.cols || pointB[BIndex].y+l+trans.y < 0 || pointB[BIndex].y+l+trans.y >= img4Vote.rows) continue;
-					img4Vote.at<cv::Vec3d>(pointB[BIndex]+cv::Point(k,l)+trans)+=patchA[i].at<cv::Vec3b>(cv::Point(k,l));
-					voteNumA.at<int>(pointB[BIndex]+cv::Point(k,l)+trans)+=1;
+					if(pointB[BIndex].x+k < 0 || pointB[BIndex].x+k >= img4Vote.cols || pointB[BIndex].y+l < 0 || pointB[BIndex].y+l >= img4Vote.rows) continue;
+					img4Vote.at<cv::Vec3d>(pointB[BIndex]+cv::Point(k,l))+=patchA[i].at<cv::Vec3b>(cv::Point(k,l));
+					voteNumA.at<int>(pointB[BIndex]+cv::Point(k,l))+=1;
+
+					//if(pointB[BIndex].x+k-trans.x < 0 || pointB[BIndex].x+k-trans.x >= img4Vote.cols || pointB[BIndex].y+l-trans.y < 0 || pointB[BIndex].y+l-trans.y >= img4Vote.rows) continue;
+					//img4Vote.at<cv::Vec3d>(pointB[BIndex]+cv::Point(k,l)-trans)+=patchA[i].at<cv::Vec3b>(cv::Point(k,l));
+					//voteNumA.at<int>(pointB[BIndex]+cv::Point(k,l)-trans)+=1;
 				}
 			}
 		}
@@ -845,9 +849,13 @@ void movingPatch(const int patchSize,const int frameNum,const cv::Mat &imgA,cons
 			{
 				for(int l=0;l<patchSize;++l)
 				{						
-					if(pointA[AIndex].x+k+trans.x < 0 || pointA[AIndex].x+k+trans.x >= imgA.cols || pointA[AIndex].y+l+trans.y < 0 || pointA[AIndex].y+l+trans.y >= imgA.rows) continue;
-					img4Vote.at<cv::Vec3d>(pointA[AIndex]+cv::Point(k,l)+trans)+=patchB[i].at<cv::Vec3b>(cv::Point(k,l));
-					voteNumB.at<int>(pointA[AIndex]+cv::Point(k,l)+trans)+=1;
+					if(pointA[AIndex].x+k < 0 || pointA[AIndex].x+k >= imgA.cols || pointA[AIndex].y+l < 0 || pointA[AIndex].y+l >= imgA.rows) continue;
+					img4Vote.at<cv::Vec3d>(pointA[AIndex]+cv::Point(k,l))+=patchB[i].at<cv::Vec3b>(cv::Point(k,l));
+					voteNumB.at<int>(pointA[AIndex]+cv::Point(k,l))+=1;
+
+					//if(pointA[AIndex].x+k-trans.x-offset.x < 0 || pointA[AIndex].x+k-trans.x-offset.x >= imgA.cols || pointA[AIndex].y+l-trans.y-offset.y < 0 || pointA[AIndex].y+l-trans.y-offset.y >= imgA.rows) continue;
+					//img4Vote.at<cv::Vec3d>(pointA[AIndex]+cv::Point(k,l)-trans-offset)+=patchB[i].at<cv::Vec3b>(cv::Point(k,l));
+					//voteNumB.at<int>(pointA[AIndex]+cv::Point(k,l)-trans-offset)+=1;
 				}
 			}
 		}

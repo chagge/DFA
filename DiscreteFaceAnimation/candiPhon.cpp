@@ -84,10 +84,15 @@ bool CANDIPHON::readPhonemeFile(const std::string &filename)
 			phoneme.endFrame=atoi( sub_token[0][1].c_str())/2;//value is doubled
 
 			int duration=atoi(sub_token[1][0].c_str());
-			if(duration%2==0) phoneme.duration=duration/2;
+			if(duration%2==0){
+				if(isEven){ phoneme.duration=1+duration/2; isEven=false;}
+				else{ phoneme.duration=duration/2; isEven=true;}
+			}
 			else{
-				if(isEven){ phoneme.duration=duration/2; isEven=false;}
-				else{ phoneme.duration=1+duration/2; isEven=true;}
+				phoneme.duration=duration/2;
+
+				//if(isEven){ phoneme.duration=duration/2; isEven=false;}
+				//else{ phoneme.duration=1+duration/2; isEven=true;}
 			}
 			phoneme.actualSize=atoi( sub_token[1][1].c_str())/2;//value is doubled
 

@@ -100,140 +100,61 @@ void GENEFACE::makeSentense(const string &output,const cv::Rect &rect)
 	int count=0;
 	int frameNum=2;//for debug
 	cv::Point trans(0,0);
+	cv::Point offset(0,0);
 	for(int i=0;i<miniDist.result.size();++i)
 	{
 		const int duration=miniDist.result[i].duration;
-		
-		if(count%2==0){
-			if(duration>2){			
-				for(int j=0;j<duration;++j)
-				{
-					cv::Mat frame;
+
+		//For debug
+		//cv::Mat debug;
+		//backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].getMiddle());
+		//backMovie >> debug;
+		//			
+		//cv::circle(debug,(cv::Point)miniDist.commonPointsMat.at<cv::Point2f>(0,miniDist.result[i].getMiddle()),3,cv::Scalar(200,0,0), -1, CV_AA);
+		//cv::circle(debug,(cv::Point)miniDist.commonPointsMat.at<cv::Point2f>(1,miniDist.result[i].getMiddle()),3,cv::Scalar(200,0,0), -1, CV_AA);
+		//cv::circle(debug,(cv::Point)miniDist.commonPointsMat.at<cv::Point2f>(11,miniDist.result[i].getMiddle()),3,cv::Scalar(200,0,0), -1, CV_AA);
+		//cv::circle(debug,(cv::Point)miniDist.commonPointsMat.at<cv::Point2f>(12,miniDist.result[i].getMiddle()),3,cv::Scalar(200,0,0), -1, CV_AA);
+
+		//cv::imshow("Debug",debug);
+		//cv::waitKey(30);
+		//getchar();
+
+		if(duration>3){			
+			for(int j=0;j<duration;++j)
+			{
+				cv::Mat frame;
+				//frameSize++;
+
+				backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+j*(duration/(double)miniDist.result[i].actualSize));
+				backMovie >> frame;
+
+				if(j==duration-1){
+					if(rect==cv::Rect()) frameA=frame.clone();
+					else frameA=frame(rect).clone();
+					frameSize=2;
+				}	
+
+				if(i!=0&&j==1){
 					frameSize++;
-
-					backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+j*(duration/(double)miniDist.result[i].actualSize));
-					backMovie >> frame;
-					if(i!=0&&j==0){
-						if(rect==cv::Rect()) frameB=frame.clone();
-						else frameB=frame(rect).clone();
-						std::vector<cv::Mat> vImage;
-						makeInterpFrame(frameA,frameB,frameSize,vImage,miniDist.offsetVec[i-1],trans);					
-						for(int k=0;k<vImage.size();++k)
-						{
-							outVideo << vImage[k];
-
-							frameNum++;
-
-						}
-					}				
-					if(rect==cv::Rect()) outVideo << frame;
-					else outVideo << frame(rect);				
-				
-					if(j==duration-1){
-						if(rect==cv::Rect()) frameA=frame.clone();
-						else frameA=frame(rect).clone();
+					if(rect==cv::Rect()) frameB=frame.clone();
+					else frameB=frame(rect).clone();
+					std::vector<cv::Mat> vImage;
+					makeInterpFrame(frameA,frameB,frameSize,vImage,miniDist.offsetVec[i-1],trans);					
+					for(int k=0;k<vImage.size();++k)
+					{
+						outVideo << vImage[k];
 					}
-					frameSize=1;
-					frameNum++;
+				}	
 
-					if(j==duration-1){
-						if(rect==cv::Rect()) frameA=frame.clone();
-						else frameA=frame(rect).clone();
-						frameSize=2;
-					}					
-				}
-				++count;
+				if(rect==cv::Rect()) outVideo << frame;
+				else outVideo << frame(rect);						
 			}
-			else{
-				frameSize+=duration;
-			}			
 		}
 		else{
 			frameSize+=duration;
-			if(frameSize>4) ++count;
-		}
+		}			
+		
+
 		if(i!=0) trans += miniDist.offsetVec[i-1];
 	}
-
-	//for(int i=0;i<miniDist.result.size();++i)
-	//{
-	//	const int duration=miniDist.result[i].duration;
-	//	if(duration<4){
-	//		if(inInterp){
-	//			frameSize+=duration;
-	//		}
-	//		else if(i==0){
-	//			cv::Mat frame;
-	//			backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame);
-	//			backMovie >> frame;
-	//			if(rect==cv::Rect()) outVideo << frame;
-	//			else outVideo << frame(rect);
-	//			frameSize+=duration-1;
-	//		}
-	//		else if(i==miniDist.result.size()-1){
-	//			if(frameSize==0){cout << "frameSize is 0" << endl; abort();}
-	//			frameSize+=duration-1;
-	//			for(int j=0;j<duration-1;++j)
-	//			{
-	//				backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+j*(duration/(double)miniDist.result[i].actualSize));
-	//				backMovie >> frameB;
-	//				std::vector<cv::Mat> vImage;
-	//				if(rect==cv::Rect()) makeInterpFrame(frameA,frameB,frameSize,vImage);
-	//				else makeInterpFrame(frameA(rect).clone(),frameB(rect).clone(),frameSize,vImage);
-	//				
-	//				for(int k=0;k<vImage.size();++k)
-	//				{
-	//					outVideo << vImage[k];
-	//				}
-	//				if(rect==cv::Rect()) outVideo << frameB;
-	//				else outVideo << frameB(rect);
-	//			}
-	//		}
-	//		else{
-	//			cout << "duration error" << endl;
-	//			abort();
-	//		}
-
-	//		continue;
-	//	}
-
-	//	for(int j=0;j<duration;++j)
-	//	{
-	//		++frameSize;			
-
-	//		if(i!=0&&j==1){
-	//			backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+2);
-	//			backMovie >> frameB;
-	//			std::vector<cv::Mat> vImage;
-	//			if(rect==cv::Rect()) makeInterpFrame(frameA,frameB,frameSize,vImage);
-	//			else makeInterpFrame(frameA(rect).clone(),frameB(rect).clone(),frameSize,vImage);
-	//			for(int k=0;k<vImage.size();++k)
-	//			{
-	//				outVideo << vImage[k];
-	//			}
-	//			if(rect==cv::Rect()) outVideo << frameB;
-	//			else outVideo << frameB(rect);
-	//			inInterp=false;
-	//		}
-
-	//		if(j==duration-2){
-	//			backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].endFrame-2);
-	//			backMovie >> frameA;
-	//			if(rect==cv::Rect()) outVideo << frameA;
-	//			else outVideo << frameA(rect);
-	//			inInterp=true;
-	//			frameSize=1;
-	//		}
-
-	//		if(!inInterp){
-	//			cv::Mat frame;
-	//			backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+j*(duration/(double)miniDist.result[i].actualSize));
-	//			backMovie >> frame;
-	//			if(rect==cv::Rect()) outVideo << frame;
-	//			else outVideo << frame(rect);
-	//		}
-
-	//	}
-
-	//}
 }
