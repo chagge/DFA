@@ -119,7 +119,8 @@ void GENEFACE::makeSentense(const string &output,const cv::Rect &rect)
 		//cv::waitKey(30);
 		//getchar();
 
-		if(duration>3){			
+		if(duration>3){
+			bool flag = false;
 			for(int j=0;j<duration;++j)
 			{
 				cv::Mat frame;
@@ -132,9 +133,7 @@ void GENEFACE::makeSentense(const string &output,const cv::Rect &rect)
 					if(rect==cv::Rect()) frameA=frame.clone();
 					else frameA=frame(rect).clone();
 					frameSize=2;
-				}	
-
-				if(i!=0&&j==1){
+				}else if(i!=0&&j==1){
 					frameSize++;
 					if(rect==cv::Rect()) frameB=frame.clone();
 					else frameB=frame(rect).clone();
@@ -144,10 +143,14 @@ void GENEFACE::makeSentense(const string &output,const cv::Rect &rect)
 					{
 						outVideo << vImage[k];
 					}
-				}	
+					flag = true;
+				}
 
-				if(rect==cv::Rect()) outVideo << frame;
-				else outVideo << frame(rect);						
+				if(i!=0) flag = true;
+				if(flag){
+					if(rect==cv::Rect()) outVideo << frame;
+					else outVideo << frame(rect);						
+				}
 			}
 		}
 		else{
