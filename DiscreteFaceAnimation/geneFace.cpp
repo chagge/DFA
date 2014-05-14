@@ -28,60 +28,60 @@ void GENEFACE::makeInterpFrame(const cv::Mat &imgA,const cv::Mat &imgB,const int
 	vector<cv::Mat> vFrame;
 	movingPatch(15,frameNum,vImageA[scaleDown],vImageB[scaleDown],vFrame,offset,trans);
 
-	//int maxIterate=1;
-	//for(int a=0;a<=scaleDown;++a)
-	//{
-	//	cout << "Scale: " << a << endl;
-	//	for(int b=0;b<maxIterate;++b)
-	//	{
-	//		cout << "Iteration: " << b << endl;
-	//		cout << "Frame: ";
-	//		for(int i=1;i<frameNum-1;++i)
-	//		{
-	//			cout << i << " ";
-	//			double alpha=(frameNum-i)/(double)frameNum;
+	int maxIterate=1;
+	for(int a=0;a<=scaleDown;++a)
+	{
+		cout << "Scale: " << a << endl;
+		for(int b=0;b<maxIterate;++b)
+		{
+			cout << "Iteration: " << b << endl;
+			cout << "Frame: ";
+			for(int i=1;i<frameNum-1;++i)
+			{
+				cout << i << " ";
+				double alpha=(frameNum-i)/(double)frameNum;
 
-	//			//Compute T3
-	//			cout << "Computing T3" << endl;
-	//			cv::Mat T3=vFrame[i].clone();
-	//			minimizeDistComp(5,0,vFrame[0],T3);
+				//Compute T3
+				cout << "Computing T3" << endl;
+				cv::Mat T3=vFrame[i].clone();
+				minimizeDistComp(5,0,vFrame[0],T3);
 
-	//			//Compute T4
-	//			cout << "Computing T4" << endl;
-	//			cv::Mat T4=vFrame[i].clone();
-	//			minimizeDistComp(5,0,vFrame[frameNum-1],T4);
+				//Compute T4
+				cout << "Computing T4" << endl;
+				cv::Mat T4=vFrame[i].clone();
+				minimizeDistComp(5,0,vFrame[frameNum-1],T4);
 
-	//			//Compute T5
-	//			cout << "Computing T5" << endl;
-	//			cv::Mat T5=vFrame[i].clone();
-	//			minimizeDAlphaDisCohere(patchSize,0,alpha,vFrame[0],vFrame[frameNum-1],T5);
+				//Compute T5
+				cout << "Computing T5" << endl;
+				cv::Mat T5=vFrame[i].clone();
+				minimizeDAlphaDisCohere(patchSize,0,alpha,vFrame[0],vFrame[frameNum-1],T5);
 
-	//			//Add T1~5
-	//			vFrame[i]=beta*alpha*T3+beta*(1.0-alpha)*T4+(1.0-beta)*T5;
-	//		}
-	//		cout << endl;
-	//	}
+				//Add T1~5
+				vFrame[i]=beta*alpha*T3+beta*(1.0-alpha)*T4+(1.0-beta)*T5;
+			}
+			cout << endl;
+		}
 
-	//	if(a!=scaleDown){
-	//		//Upscaling
-	//		for(int c=1;c<frameNum-1;++c)
-	//		{
-	//			cv::resize(vFrame[c],vFrame[c],vImageA[scaleDown-a-1].size(),cv::INTER_LANCZOS4);
-	//		}
-	//		vFrame[0]=vImageA[scaleDown-a-1].clone(); 
-	//		vFrame[frameNum-1]=vImageB[scaleDown-a-1].clone();
-	//		maxIterate=6*(scaleDown-a-1)/scaleDown+2;
-	//	}
-	//}
+		if(a!=scaleDown){
+			//Upscaling
+			for(int c=1;c<frameNum-1;++c)
+			{
+				cv::resize(vFrame[c],vFrame[c],vImageA[scaleDown-a-1].size(),cv::INTER_LANCZOS4);
+			}
+			vFrame[0]=vImageA[scaleDown-a-1].clone(); 
+			vFrame[frameNum-1]=vImageB[scaleDown-a-1].clone();
+			maxIterate=6*(scaleDown-a-1)/scaleDown+2;
+		}
+	}
 
 	cout << "Save Image..." << endl;
 	//Save Image
-	vImage.resize(frameNum-2);
-	for(int i=1;i<frameNum-1;++i)
+	for(int i=0;i<frameNum;++i)
 	{
 		cv::cvtColor(vFrame[i],vFrame[i],cv::COLOR_Lab2BGR);
-		vImage[i-1]=vFrame[i];
 	}
+
+	vImage = vFrame;
 }
 
 void GENEFACE::makeSentense(const string &output,const cv::Rect &rect)
@@ -98,9 +98,9 @@ void GENEFACE::makeSentense(const string &output,const cv::Rect &rect)
 	cv::Mat frameA,frameB;
 
 	int count=0;
-	int frameNum=2;//for debug
 	cv::Point trans(0,0);
 	cv::Point offset(0,0);
+
 	for(int i=0;i<miniDist.result.size();++i)
 	{
 		const int duration=miniDist.result[i].duration;
@@ -118,7 +118,7 @@ void GENEFACE::makeSentense(const string &output,const cv::Rect &rect)
 		//cv::imshow("Debug",debug);
 		//cv::waitKey(30);
 		//getchar();
-
+		cout << miniDist.result.size() << " " << i << " " << duration << endl;
 		if(duration>3){
 			bool flag = false;
 			for(int j=0;j<duration;++j)
@@ -129,35 +129,138 @@ void GENEFACE::makeSentense(const string &output,const cv::Rect &rect)
 				backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+j*(duration/(double)miniDist.result[i].actualSize));
 				backMovie >> frame;
 
-				if(j==duration-1){
-					if(rect==cv::Rect()) frameA=frame.clone();
-					else frameA=frame(rect).clone();
-					frameSize=2;
-				}else if(i!=0&&j==1){
+				if(i!=0&&j==1){
+					if(frameSize==3){ frameSize+=duration; break;}
 					frameSize++;
 					if(rect==cv::Rect()) frameB=frame.clone();
 					else frameB=frame(rect).clone();
 					std::vector<cv::Mat> vImage;
-					makeInterpFrame(frameA,frameB,frameSize,vImage,miniDist.offsetVec[i-1],trans);					
+					makeInterpFrame(frameA,frameB,frameSize,vImage,miniDist.offsetVec[i-1],trans);
+					cout << "makeInterpolation " << frameSize << endl;
+					count += frameSize;
 					for(int k=0;k<vImage.size();++k)
 					{
 						outVideo << vImage[k];
+						cout << "Add interpolated image" << endl;
+						
 					}
 					flag = true;
+					continue;
+				} else if(i!=miniDist.result.size()-1&&j==duration-2){					
+					if(rect==cv::Rect()) frameA=frame.clone();
+					else frameA=frame(rect).clone();
+					cout << "Input A" << endl;
+					frameSize=2;
+					frameSize++;
+					flag = false;
+					continue;
 				}
-
-				if(i!=0) flag = true;
+				if(i==0) flag = true;
 				if(flag){
 					if(rect==cv::Rect()) outVideo << frame;
 					else outVideo << frame(rect);						
+					cout << "Add image" << endl;
+					count++;
 				}
 			}
 		}
 		else{
+			if(frameSize>10){
+				if(duration==1){
+					cv::Mat frame;
+					backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame);
+					backMovie >> frame;
+					if(rect==cv::Rect()) frameB=frame.clone();
+					else frameB=frame(rect).clone();
+					std::vector<cv::Mat> vImage;
+					makeInterpFrame(frameA,frameB,frameSize,vImage,miniDist.offsetVec[i-1],trans);
+					cout << "makeInterpolation " << frameSize << endl;
+					count += frameSize;
+					for(int k=0;k<vImage.size()-1;++k)
+					{
+						outVideo << vImage[k];
+						cout << "Add interpolated image" << endl;
+						
+					}
+					backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame);
+					backMovie >> frame;
+					if(rect==cv::Rect()) frameA=frame.clone();
+					else frameA=frame(rect).clone();
+					cout << "Input A" << endl;
+					frameSize=2;
+				}else if(duration==2){
+					cv::Mat frame;
+					backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame);
+					backMovie >> frame;
+					if(rect==cv::Rect()) frameB=frame.clone();
+					else frameB=frame(rect).clone();
+					std::vector<cv::Mat> vImage;
+					makeInterpFrame(frameA,frameB,frameSize,vImage,miniDist.offsetVec[i-1],trans);
+					cout << "makeInterpolation " << frameSize << endl;
+					count += frameSize;
+					for(int k=0;k<vImage.size();++k)
+					{
+						outVideo << vImage[k];
+						cout << "Add interpolated image" << endl;
+						
+					}
+					backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+1);
+					backMovie >> frame;
+					if(rect==cv::Rect()) frameA=frame.clone();
+					else frameA=frame(rect).clone();
+					cout << "Input A" << endl;
+					frameSize=2;
+				}else if(duration==3){
+					cv::Mat frame;
+					backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame);
+					backMovie >> frame;
+					if(rect==cv::Rect()) frameB=frame.clone();
+					else frameB=frame(rect).clone();
+					std::vector<cv::Mat> vImage;
+					makeInterpFrame(frameA,frameB,frameSize,vImage,miniDist.offsetVec[i-1],trans);
+					cout << "makeInterpolation " << frameSize << endl;
+					count += frameSize;
+					for(int k=0;k<vImage.size();++k)
+					{
+						outVideo << vImage[k];
+						cout << "Add interpolated image" << endl;
+						
+					}
+					backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+1);
+					backMovie >> frame;
+					if(rect==cv::Rect()) outVideo << frame.clone();
+					else outVideo << frame(rect).clone();
+					backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].startFrame+2);
+					backMovie >> frame;
+					if(rect==cv::Rect()) frameA=frame.clone();
+					else frameA=frame(rect).clone();
+					cout << "Input A" << endl;
+					frameSize=2;
+				}
+			}
+			if(i==miniDist.result.size()-1){
+				frameSize+=duration-1;
+				cv::Mat frame;
+				backMovie.set(CV_CAP_PROP_POS_FRAMES,(double)miniDist.result[i].endFrame);
+				backMovie >> frame;
+				if(rect==cv::Rect()) frameB=frame.clone();
+				else frameB=frame(rect).clone();
+				std::vector<cv::Mat> vImage;
+				makeInterpFrame(frameA,frameB,frameSize,vImage,miniDist.offsetVec[i-1],trans);
+				cout << "makeInterpolation " << frameSize << endl;
+				count += frameSize;
+				for(int k=0;k<vImage.size();++k)
+				{
+					outVideo << vImage[k];
+					cout << "Add interpolated image" << endl;
+						
+				}
+			}
+			cout << "continue" << endl;
 			frameSize+=duration;
-		}			
-		
-
+		}					
 		if(i!=0) trans += miniDist.offsetVec[i-1];
 	}
+	cout << count << endl;
+	getchar();
 }

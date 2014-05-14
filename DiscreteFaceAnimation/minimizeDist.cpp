@@ -123,11 +123,4 @@ void MINIMIZEDISTORTION::computeOffsetVec(){
 		offsetVec[i] = (cv::Point)offset;		
 	}
 
-	int frameNum=0;
-	for(int i=0;i<result.size();++i)
-	{
-		frameNum += result[i].duration;
-	}
-	cout << frameNum << endl;
-	getchar();
 }
